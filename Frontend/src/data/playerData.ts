@@ -1,306 +1,122 @@
-import type { Player } from '@/types';
+export interface PlayerStats {
+  ppg: number;
+  rpg: number;
+  apg: number;
+  spg: number;
+  bpg: number;
+  fgPct: number;
+  threePct: number;
+  ftPct: number;
+  topg: number;
+  mpg: number;
+}
 
-export type { Player };
+export interface CareerOutcome {
+  outcome: string;
+  probability: number;
+  description: string;
+}
 
-export const players: Player[] = [
+export interface SeasonLog {
+  season: string;
+  ppg: number;
+  rpg: number;
+  apg: number;
+  fgPct: number;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  school: string;
+  year: string;
+  position: string;
+  height: string;
+  weight: string;
+  archetype: string;
+  archetypeConfidence: number;
+  nbaComp: string;
+  stats: PlayerStats;
+  careerOutcomes: CareerOutcome[];
+  seasonLog: SeasonLog[];
+  strengths: string[];
+  weaknesses: string[];
+}
+
+export const playerDatabase: Player[] = [
   {
-    id: '1',
-    name: 'Marcus Williams',
-    college: 'Duke',
-    position: 'PG',
-    height: '6\'3"',
-    weight: 185,
-    year: 'Junior',
-    ncaaStats: {
+    id: "marcus-williams",
+    name: "Marcus Williams",
+    school: "Duke",
+    year: "Junior",
+    position: "PG",
+    height: "6'3\"",
+    weight: "185 lbs",
+    archetype: "Point Guard Playmaker",
+    archetypeConfidence: 87,
+    nbaComp: "Malcolm Brogdon",
+    stats: {
       ppg: 18.5,
       rpg: 3.8,
       apg: 7.2,
-      fg_percentage: 46.3,
-      three_pt_percentage: 38.7,
-      ft_percentage: 84.2,
-      spg: 1.8,
-      bpg: 0.3,
-      per: 24.1
-    },
-    predictedArchetype: 'Point Guard Playmaker',
-    archetypeConfidence: 87,
-    nbaComparison: 'Malcolm Brogdon',
-    strengths: ['Court vision', 'Decision making', 'Three-point shooting'],
-    concerns: ['Athletic ceiling', 'Defensive versatility']
-  },
-  {
-    id: '2',
-    name: 'James Thompson',
-    college: 'Kentucky',
-    position: 'C',
-    height: '7\'0"',
-    weight: 245,
-    year: 'Sophomore',
-    ncaaStats: {
-      ppg: 14.2,
-      rpg: 9.5,
-      apg: 1.3,
-      fg_percentage: 58.9,
-      three_pt_percentage: 35.2,
-      ft_percentage: 71.5,
-      spg: 0.7,
-      bpg: 2.8,
-      per: 26.7
-    },
-    predictedArchetype: 'Stretch Big',
-    archetypeConfidence: 82,
-    nbaComparison: 'Jaren Jackson Jr.',
-    strengths: ['Rim protection', 'Floor spacing', 'Rebounding'],
-    concerns: ['Lateral quickness', 'Foul trouble']
-  },
-  {
-    id: '3',
-    name: 'Darius Mitchell',
-    college: 'Gonzaga',
-    position: 'SF',
-    height: '6\'7"',
-    weight: 215,
-    year: 'Senior',
-    ncaaStats: {
-      ppg: 16.8,
-      rpg: 5.2,
-      apg: 2.1,
-      fg_percentage: 48.1,
-      three_pt_percentage: 41.3,
-      ft_percentage: 78.9,
-      spg: 1.5,
-      bpg: 0.8,
-      per: 20.3
-    },
-    predictedArchetype: '3-and-D Wing',
-    archetypeConfidence: 91,
-    nbaComparison: 'Mikal Bridges',
-    strengths: ['Three-point shooting', 'Perimeter defense', 'Off-ball movement'],
-    concerns: ['Ball handling', 'Creating own shot']
-  },
-  {
-    id: '4',
-    name: 'Tyler Jackson',
-    college: 'Kansas',
-    position: 'SG',
-    height: '6\'4"',
-    weight: 200,
-    year: 'Junior',
-    ncaaStats: {
-      ppg: 22.3,
-      rpg: 4.1,
-      apg: 3.5,
-      fg_percentage: 44.7,
-      three_pt_percentage: 37.8,
-      ft_percentage: 86.4,
-      spg: 1.2,
-      bpg: 0.4,
-      per: 22.8
-    },
-    predictedArchetype: 'Scoring Guard',
-    archetypeConfidence: 88,
-    nbaComparison: 'Jordan Poole',
-    strengths: ['Shot creation', 'Scoring versatility', 'Free throw shooting'],
-    concerns: ['Shot selection', 'Defensive consistency']
-  },
-  {
-    id: '5',
-    name: 'Anthony Davis Jr.',
-    college: 'UNC',
-    position: 'PF',
-    height: '6\'9"',
-    weight: 230,
-    year: 'Sophomore',
-    ncaaStats: {
-      ppg: 15.9,
-      rpg: 8.7,
-      apg: 2.8,
-      fg_percentage: 52.4,
-      three_pt_percentage: 33.1,
-      ft_percentage: 73.2,
-      spg: 1.6,
-      bpg: 1.9,
-      per: 23.5
-    },
-    predictedArchetype: 'Two-Way Forward',
-    archetypeConfidence: 85,
-    nbaComparison: 'Aaron Gordon',
-    strengths: ['Versatility', 'Help defense', 'Transition play'],
-    concerns: ['Outside shooting', 'Consistent scoring']
-  },
-  {
-    id: '6',
-    name: 'Chris Wilson',
-    college: 'UCLA',
-    position: 'C',
-    height: '6\'11"',
-    weight: 255,
-    year: 'Senior',
-    ncaaStats: {
-      ppg: 11.3,
-      rpg: 10.8,
-      apg: 1.1,
-      fg_percentage: 61.2,
-      three_pt_percentage: 0.0,
-      ft_percentage: 64.5,
-      spg: 0.5,
-      bpg: 3.2,
-      per: 24.9
-    },
-    predictedArchetype: 'Paint Protector',
-    archetypeConfidence: 93,
-    nbaComparison: 'Jarrett Allen',
-    strengths: ['Rim protection', 'Rebounding', 'Screen setting'],
-    concerns: ['Limited range', 'Free throw shooting']
-  },
-  {
-    id: '7',
-    name: 'Jordan Lee',
-    college: 'Michigan State',
-    position: 'PG',
-    height: '6\'1"',
-    weight: 175,
-    year: 'Junior',
-    ncaaStats: {
-      ppg: 20.1,
-      rpg: 3.2,
-      apg: 5.9,
-      fg_percentage: 43.8,
-      three_pt_percentage: 36.5,
-      ft_percentage: 88.1,
-      spg: 2.1,
-      bpg: 0.2,
-      per: 21.7
-    },
-    predictedArchetype: 'High-Usage Ball Handler',
-    archetypeConfidence: 79,
-    nbaComparison: 'Collin Sexton',
-    strengths: ['Speed', 'Ball handling', 'Scoring instincts'],
-    concerns: ['Size', 'Playmaking', 'Defense']
-  },
-  {
-    id: '8',
-    name: 'Brandon Carter',
-    college: 'Villanova',
-    position: 'SG/SF',
-    height: '6\'6"',
-    weight: 205,
-    year: 'Senior',
-    ncaaStats: {
-      ppg: 17.2,
-      rpg: 4.9,
-      apg: 2.7,
-      fg_percentage: 47.3,
-      three_pt_percentage: 39.8,
-      ft_percentage: 81.6,
-      spg: 1.7,
-      bpg: 0.6,
-      per: 21.4
-    },
-    predictedArchetype: '3-and-D Wing',
-    archetypeConfidence: 89,
-    nbaComparison: 'Josh Hart',
-    strengths: ['Three-point shooting', 'Defensive IQ', 'Rebounding'],
-    concerns: ['Ball handling', 'Elite athleticism']
-  },
-  {
-    id: '9',
-    name: 'Kevin Moore',
-    college: 'Arizona',
-    position: 'PF/C',
-    height: '6\'10"',
-    weight: 240,
-    year: 'Sophomore',
-    ncaaStats: {
-      ppg: 13.8,
-      rpg: 7.9,
-      apg: 1.9,
-      fg_percentage: 54.1,
-      three_pt_percentage: 38.4,
-      ft_percentage: 76.3,
-      spg: 0.9,
-      bpg: 1.4,
-      per: 22.1
-    },
-    predictedArchetype: 'Floor Spacing Big',
-    archetypeConfidence: 84,
-    nbaComparison: 'Bobby Portis',
-    strengths: ['Three-point shooting', 'Pick-and-pop', 'Motor'],
-    concerns: ['Rim protection', 'Lateral mobility']
-  },
-  {
-    id: '10',
-    name: 'DeAndre Robinson',
-    college: 'Texas',
-    position: 'C',
-    height: '7\'1"',
-    weight: 265,
-    year: 'Junior',
-    ncaaStats: {
-      ppg: 12.5,
-      rpg: 11.2,
-      apg: 0.9,
-      fg_percentage: 59.7,
-      three_pt_percentage: 28.6,
-      ft_percentage: 68.9,
-      spg: 0.6,
-      bpg: 2.9,
-      per: 25.3
-    },
-    predictedArchetype: 'Defensive Anchor',
-    archetypeConfidence: 90,
-    nbaComparison: 'Clint Capela',
-    strengths: ['Rebounding', 'Rim protection', 'Lob threat'],
-    concerns: ['Offensive versatility', 'Shooting range']
-  },
-  {
-    id: '11',
-    name: 'Isaiah Thomas III',
-    college: 'Purdue',
-    position: 'PG/SG',
-    height: '6\'2"',
-    weight: 190,
-    year: 'Senior',
-    ncaaStats: {
-      ppg: 19.7,
-      rpg: 3.5,
-      apg: 6.3,
-      fg_percentage: 45.9,
-      three_pt_percentage: 40.2,
-      ft_percentage: 85.7,
       spg: 1.4,
-      bpg: 0.3,
-      per: 23.6
+      bpg: 0.2,
+      fgPct: 46.3,
+      threePct: 38.7,
+      ftPct: 84.2,
+      topg: 2.1,
+      mpg: 34.6,
     },
-    predictedArchetype: 'Combo Guard',
-    archetypeConfidence: 86,
-    nbaComparison: 'Jalen Brunson',
-    strengths: ['Basketball IQ', 'Shooting', 'Leadership'],
-    concerns: ['Athleticism', 'Size on defense']
+    careerOutcomes: [
+      { outcome: "All-Star", probability: 12, description: "Multiple All-Star selections, franchise cornerstone" },
+      { outcome: "Quality Starter", probability: 34, description: "Consistent starter averaging 14+ PPG for 8+ seasons" },
+      { outcome: "Solid Rotation", probability: 28, description: "Reliable rotation player with 7+ year career" },
+      { outcome: "Role Player", probability: 18, description: "Bench contributor with specific skill set" },
+      { outcome: "Out of League", probability: 8, description: "Exits NBA within 3 seasons" },
+    ],
+    seasonLog: [
+      { season: "2022-23", ppg: 10.2, rpg: 2.8, apg: 4.5, fgPct: 42.1 },
+      { season: "2023-24", ppg: 14.8, rpg: 3.3, apg: 5.9, fgPct: 44.0 },
+      { season: "2024-25", ppg: 18.5, rpg: 3.8, apg: 7.2, fgPct: 46.3 },
+    ],
+    strengths: ["Court vision", "Mid-range shooting", "Pick & roll management", "Free throw shooting"],
+    weaknesses: ["Lateral quickness", "Finishing through contact", "Defensive consistency"],
   },
   {
-    id: '12',
-    name: 'Malik Johnson',
-    college: 'Baylor',
-    position: 'SF/PF',
-    height: '6\'8"',
-    weight: 225,
-    year: 'Junior',
-    ncaaStats: {
-      ppg: 16.3,
-      rpg: 6.8,
-      apg: 2.4,
-      fg_percentage: 49.8,
-      three_pt_percentage: 36.7,
-      ft_percentage: 74.1,
-      spg: 1.9,
-      bpg: 1.2,
-      per: 21.9
+    id: "jaylen-carter",
+    name: "Jaylen Carter",
+    school: "Kentucky",
+    year: "Sophomore",
+    position: "SG",
+    height: "6'5\"",
+    weight: "205 lbs",
+    archetype: "Two-Way Wing",
+    archetypeConfidence: 91,
+    nbaComp: "Mikal Bridges",
+    stats: {
+      ppg: 16.8,
+      rpg: 5.1,
+      apg: 2.9,
+      spg: 1.8,
+      bpg: 0.6,
+      fgPct: 47.8,
+      threePct: 36.2,
+      ftPct: 79.5,
+      topg: 1.6,
+      mpg: 33.2,
     },
-    predictedArchetype: 'Two-Way Forward',
-    archetypeConfidence: 87,
-    nbaComparison: 'OG Anunoby',
-    strengths: ['Versatile defense', 'Athleticism', 'Energy'],
-    concerns: ['Ball handling', 'Three-point consistency']
-  }
+    careerOutcomes: [
+      { outcome: "All-Star", probability: 18, description: "Elite two-way player, defensive anchor" },
+      { outcome: "Quality Starter", probability: 38, description: "Starting-caliber wing on a playoff team" },
+      { outcome: "Solid Rotation", probability: 25, description: "Switchable defender off the bench" },
+      { outcome: "Role Player", probability: 14, description: "3&D specialist" },
+      { outcome: "Out of League", probability: 5, description: "Exits NBA within 3 seasons" },
+    ],
+    seasonLog: [
+      { season: "2023-24", ppg: 12.3, rpg: 4.2, apg: 1.8, fgPct: 44.5 },
+      { season: "2024-25", ppg: 16.8, rpg: 5.1, apg: 2.9, fgPct: 47.8 },
+    ],
+    strengths: ["Perimeter defense", "Transition offense", "Athleticism", "Wingspan"],
+    weaknesses: ["Ball handling", "Off-dribble creation", "Free throw shooting"],
+  },
 ];
