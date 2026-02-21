@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 
 # absolute paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # .../Backend
@@ -236,7 +237,23 @@ def make_ncaa_playstyle_df(df_ncaa: pd.DataFrame) -> pd.DataFrame:
     df["mid_fg_pct"] = df["midmade/(midmade+midmiss)"]
     df["three_fg_pct"] = df["TP_per"]
 
+    PCT_COLS = [
+    "TS_per", "eFG",
+    "rim_fg_pct", "mid_fg_pct", "three_fg_pct",
+    "FT_per", "twoP_per", "TP_per"
+    ]
+
+    for c in PCT_COLS:
+        if c in df.columns:
+            df[c] = pct_to_decimal_if_needed(df[c])
+
     return df
+
+def pct_to_decimal_if_needed(s):
+    s = pd.to_numeric(s, errors="coerce")
+    med = s.dropna().median()
+    # if median is > 1.5, it's almost certainly 0–100 style percent
+    return s / 100.0 if med > 1.5 else s
 
 if __name__ == "__main__":
     print("---- CURRENT NCAA ----")
@@ -253,5 +270,10 @@ if __name__ == "__main__":
     df_nba = load_current_nba_data()
     print("Shape:", df_nba.shape)
     print(df_nba.head(5))
+    df_nba = make_nba_playstyle_df(df_nba)
+    df_past = make_ncaa_playstyle_df(df_past)
+    df_current = make_ncaa_playstyle_df(df_current)
     print("\n---- NBA MERGED COLS ----")
     print(df_nba.columns.tolist())  
+    print("\n---- NCAA Cols ----")
+    print(df_current.columns.to_list)
