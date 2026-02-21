@@ -25,6 +25,21 @@ export interface SeasonLog {
   fgPct: number;
 }
 
+export interface NBAComparison {
+  name: string;
+  team: string;
+  position: string;
+  matchScore: number;
+  headshotUrl: string;
+  similarities: string[];
+  differences: string[];
+  stats: {
+    ppg: number;
+    rpg: number;
+    apg: number;
+  };
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -36,6 +51,7 @@ export interface Player {
   archetype: string;
   archetypeConfidence: number;
   nbaComp: string;
+  nbaComparisons: NBAComparison[];
   stats: PlayerStats;
   careerOutcomes: CareerOutcome[];
   seasonLog: SeasonLog[];
@@ -55,6 +71,58 @@ export const playerDatabase: Player[] = [
     archetype: "Point Guard Playmaker",
     archetypeConfidence: 87,
     nbaComp: "Malcolm Brogdon",
+    nbaComparisons: [
+      {
+        name: "Malcolm Brogdon",
+        team: "Washington Wizards",
+        position: "PG",
+        matchScore: 87,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1627763.png",
+        similarities: ["High basketball IQ", "Efficient mid-range game", "Strong free throw shooting", "Solid playmaking ability"],
+        differences: ["Brogdon is more physical defender", "Williams has quicker first step", "Brogdon more experienced in pick-and-roll"],
+        stats: { ppg: 15.7, rpg: 4.5, apg: 5.8 }
+      },
+      {
+        name: "Tyrese Haliburton",
+        team: "Indiana Pacers",
+        position: "PG",
+        matchScore: 82,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1630169.png",
+        similarities: ["Elite court vision", "Smart decision maker", "Efficient shooter", "Pass-first mentality"],
+        differences: ["Haliburton has longer wingspan", "Williams more aggressive scorer", "Haliburton better in transition"],
+        stats: { ppg: 20.1, rpg: 3.9, apg: 10.9 }
+      },
+      {
+        name: "Jalen Brunson",
+        team: "New York Knicks",
+        position: "PG",
+        matchScore: 78,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1628973.png",
+        similarities: ["Tough shot maker", "Strong in clutch", "Mid-range specialist", "High motor player"],
+        differences: ["Brunson more physical", "Williams taller", "Brunson more proven playoff performer"],
+        stats: { ppg: 28.7, rpg: 3.6, apg: 6.7 }
+      },
+      {
+        name: "Fred VanVleet",
+        team: "Houston Rockets",
+        position: "PG",
+        matchScore: 74,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1627832.png",
+        similarities: ["Defensive effort", "Three-point shooting", "Leadership qualities", "Competitive spirit"],
+        differences: ["VanVleet more tenacious defender", "Williams better finisher", "VanVleet more experienced"],
+        stats: { ppg: 17.1, rpg: 3.8, apg: 7.2 }
+      },
+      {
+        name: "Derrick White",
+        team: "Boston Celtics",
+        position: "PG/SG",
+        matchScore: 71,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1628401.png",
+        similarities: ["Two-way potential", "Smart defender", "Team-first mentality", "Solid shooter"],
+        differences: ["White is elite shot blocker for guard", "Williams better passer", "White more versatile defensively"],
+        stats: { ppg: 15.2, rpg: 4.2, apg: 5.2 }
+      }
+    ],
     stats: {
       ppg: 18.5,
       rpg: 3.8,
@@ -93,6 +161,58 @@ export const playerDatabase: Player[] = [
     archetype: "Two-Way Wing",
     archetypeConfidence: 91,
     nbaComp: "Mikal Bridges",
+    nbaComparisons: [
+      {
+        name: "Mikal Bridges",
+        team: "New York Knicks",
+        position: "SF",
+        matchScore: 91,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1628969.png",
+        similarities: ["Elite perimeter defender", "High motor", "Excellent wingspan", "Consistent three-point shooter"],
+        differences: ["Bridges more polished", "Carter more explosive athlete", "Bridges better off-ball movement"],
+        stats: { ppg: 19.6, rpg: 4.5, apg: 3.6 }
+      },
+      {
+        name: "Herb Jones",
+        team: "New Orleans Pelicans",
+        position: "SF",
+        matchScore: 86,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1630537.png",
+        similarities: ["Lockdown defender", "Versatile on both ends", "High effort player", "Team-first attitude"],
+        differences: ["Jones more physical", "Carter better shooter", "Jones more switchable"],
+        stats: { ppg: 11.2, rpg: 3.8, apg: 2.1 }
+      },
+      {
+        name: "OG Anunoby",
+        team: "New York Knicks",
+        position: "SF",
+        matchScore: 83,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1628384.png",
+        similarities: ["Elite wing defender", "Strong build", "Improving offensive game", "Reliable three-point shot"],
+        differences: ["Anunoby stronger", "Carter quicker laterally", "Anunoby more experienced"],
+        stats: { ppg: 14.1, rpg: 4.4, apg: 2.1 }
+      },
+      {
+        name: "Jalen Williams",
+        team: "Oklahoma City Thunder",
+        position: "SG/SF",
+        matchScore: 79,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1631114.png",
+        similarities: ["Two-way versatility", "Long wingspan", "Improving playmaker", "Smart defender"],
+        differences: ["Williams better ball handler", "Carter more athletic", "Williams more creative scorer"],
+        stats: { ppg: 19.1, rpg: 4.5, apg: 5.1 }
+      },
+      {
+        name: "Cam Johnson",
+        team: "Brooklyn Nets",
+        position: "SF",
+        matchScore: 75,
+        headshotUrl: "https://cdn.nba.com/headshots/nba/latest/1040x760/1629661.png",
+        similarities: ["Knockdown shooter", "Solid defender", "Good size", "Low turnover player"],
+        differences: ["Johnson better shooter", "Carter more athletic", "Johnson more off-ball oriented"],
+        stats: { ppg: 13.4, rpg: 4.3, apg: 2.4 }
+      }
+    ],
     stats: {
       ppg: 16.8,
       rpg: 5.1,

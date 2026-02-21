@@ -387,6 +387,8 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
             archetype={player.archetype}
             confidence={player.archetypeConfidence}
             nbaComp={player.nbaComp}
+            playerName={player.name}
+            nbaComparisons={player.nbaComparisons}
           />
 
           {/* Scouting Notes */}
@@ -394,16 +396,16 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
         </div>
 
         {/* Career Outcomes */}
-        <div className="glass-card rounded-xl p-6">
+        <div className="glass-card-3d rounded-xl p-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
               Career Outcome Projections
             </h2>
-            <span className="rounded-md bg-primary/10 px-3 py-1 font-display text-xs font-semibold text-primary">
+            <span className="rounded-lg bg-gradient-to-r from-primary/20 to-orange-500/20 px-4 py-1.5 font-display text-xs font-semibold text-primary border border-primary/30 shadow-lg shadow-primary/10">
               AI Model v3.2
             </span>
           </div>
-          <div className="space-y-5">
+          <div className="space-y-3">
             {player.careerOutcomes.map((outcome, i) => (
               <CareerOutcomeBar key={outcome.outcome} outcome={outcome} index={i} />
             ))}
