@@ -190,6 +190,19 @@ def make_nba_playstyle_df(df_nba: pd.DataFrame) -> pd.DataFrame:
         if c in df.columns:
             df[c] = to_num(df[c])
 
+    
+    # Add per 36
+    for c in ["PTS", "AST", "TRB", "MP"]:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
+
+    df = df[df["MP"] > 0]  # avoid divide by zero
+
+    df["pts_per36"] = 36.0 * df["PTS"] / df["MP"]
+    df["ast_per36"] = 36.0 * df["AST"] / df["MP"]
+    df["trb_per36"] = 36.0 * df["TRB"] / df["MP"]
+
+    # Downweight them slightly (important for cosine)
+
 
     return df
 
@@ -246,6 +259,17 @@ def make_ncaa_playstyle_df(df_ncaa: pd.DataFrame) -> pd.DataFrame:
     for c in PCT_COLS:
         if c in df.columns:
             df[c] = pct_to_decimal_if_needed(df[c])
+
+
+    # Per 36
+    for c in ["pts", "ast", "treb", "mp"]:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
+
+    df = df[df["mp"] > 0]
+
+    df["pts_per36"] = 36.0 * df["pts"] / df["mp"]
+    df["ast_per36"] = 36.0 * df["ast"] / df["mp"]
+    df["trb_per36"] = 36.0 * df["treb"] / df["mp"]
 
     return df
 
