@@ -17,11 +17,23 @@ const PlayerHeader = ({ player }: PlayerHeaderProps) => {
 
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-6">
-          {/* Player avatar with glow */}
+          {/* Player headshot with glow */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-primary to-orange-500 rounded-full blur-lg opacity-50" />
-            <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-card border-2 border-primary/30 font-display text-3xl font-bold text-gradient shadow-2xl">
-              {player.name.split(" ").map(n => n[0]).join("")}
+            <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-card border-2 border-primary/30 font-display text-3xl font-bold text-gradient shadow-2xl overflow-hidden">
+              <img
+                src={player.headshotUrl}
+                alt={player.name}
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  img.style.display = "none";
+                  img.nextElementSibling?.classList.remove("hidden");
+                }}
+              />
+              <span className="hidden font-display text-3xl font-bold text-gradient">
+                {player.name.split(" ").map(n => n[0]).join("")}
+              </span>
             </div>
           </div>
 
@@ -53,12 +65,9 @@ const PlayerHeader = ({ player }: PlayerHeaderProps) => {
         </div>
 
         <div className="flex gap-3">
-          <button className="rounded-xl bg-gradient-to-r from-primary to-orange-500 px-6 py-3 font-display text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-all hover:shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-95">
-            Compare Player
-          </button>
-          <button className="rounded-xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-6 py-3 font-display text-xs font-semibold uppercase tracking-wider text-secondary-foreground transition-all hover:bg-secondary hover:border-primary/30 hover:shadow-lg">
-            Full Report
-          </button>
+          <span className="rounded-xl bg-gradient-to-r from-primary/20 to-orange-500/20 px-6 py-3 font-display text-xs font-semibold text-primary border border-primary/30">
+            Draft Score: {player.draftabilityScore}
+          </span>
         </div>
       </div>
     </div>
