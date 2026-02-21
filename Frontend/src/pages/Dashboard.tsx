@@ -9,7 +9,14 @@ import SeasonTrend from "@/components/SeasonTrend";
 import SkillTags from "@/components/SkillTags";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, X, SlidersHorizontal } from "lucide-react";
 
 interface DashboardProps {
   onLogout: () => void;
@@ -20,21 +27,66 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>(playerDatabase[0].id);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [collegeFilter, setCollegeFilter] = useState<string>("all");
+  const [positionFilter, setPositionFilter] = useState<string>("all");
+  const [minPPG, setMinPPG] = useState<string>("");
+  const [minRPG, setMinRPG] = useState<string>("");
+  const [minAPG, setMinAPG] = useState<string>("");
   const searchRef = useRef<HTMLDivElement>(null);
 
   const player = playerDatabase.find((p) => p.id === selectedPlayerId) || playerDatabase[0];
 
+  const colleges = useMemo(() => {
+    const uniqueColleges = [...new Set(playerDatabase.map((p) => p.school))];
+    return uniqueColleges.sort();
+  }, []);
+
+  const positions = useMemo(() => {
+    const uniquePositions = [...new Set(playerDatabase.map((p) => p.position))];
+    return uniquePositions.sort();
+  }, []);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (collegeFilter !== "all") count++;
+    if (positionFilter !== "all") count++;
+    if (minPPG) count++;
+    if (minRPG) count++;
+    if (minAPG) count++;
+    return count;
+  }, [collegeFilter, positionFilter, minPPG, minRPG, minAPG]);
+
   const filteredPlayers = useMemo(() => {
-    if (!searchQuery.trim()) return playerDatabase;
-    const query = searchQuery.toLowerCase();
-    return playerDatabase.filter(
-      (p) =>
-        p.name.toLowerCase().includes(query) ||
-        p.school.toLowerCase().includes(query) ||
-        p.position.toLowerCase().includes(query) ||
-        p.archetype.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
+    return playerDatabase.filter((p) => {
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch =
+          p.name.toLowerCase().includes(query) ||
+          p.school.toLowerCase().includes(query) ||
+          p.position.toLowerCase().includes(query) ||
+          p.archetype.toLowerCase().includes(query);
+        if (!matchesSearch) return false;
+      }
+
+      if (collegeFilter !== "all" && p.school !== collegeFilter) return false;
+      if (positionFilter !== "all" && p.position !== positionFilter) return false;
+      if (minPPG && p.stats.ppg < parseFloat(minPPG)) return false;
+      if (minRPG && p.stats.rpg < parseFloat(minRPG)) return false;
+      if (minAPG && p.stats.apg < parseFloat(minAPG)) return false;
+
+      return true;
+    });
+  }, [searchQuery, collegeFilter, positionFilter, minPPG, minRPG, minAPG]);
+
+  const clearAllFilters = () => {
+    setCollegeFilter("all");
+    setPositionFilter("all");
+    setMinPPG("");
+    setMinRPG("");
+    setMinAPG("");
+    setSearchQuery("");
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -70,7 +122,7 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
           </Link>
           <div className="flex items-center gap-6">
             {/* Search Bar */}
-            <div ref={searchRef} className="relative">
+            <div ref={searchRef} className="relative flex items-center gap-2">
               <div className="relative flex items-center">
                 <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
@@ -96,6 +148,20 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
                   </button>
                 )}
               </div>
+              <Button
+                variant={showFilters ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="h-9 gap-1.5"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                <span className="hidden sm:inline">Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
               
               {isSearchOpen && (searchQuery || filteredPlayers.length > 0) && (
                 <div className="absolute top-full mt-2 w-80 bg-card border border-border rounded-lg shadow-xl overflow-hidden z-50">
@@ -176,6 +242,122 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
           </div>
         </div>
       </nav>
+
+      {/* Filter Panel */}
+      {showFilters && (
+        <div className="border-b border-border bg-card/40 backdrop-blur-sm">
+          <div className="mx-auto max-w-7xl px-6 py-4">
+            <div className="flex flex-wrap items-end gap-4">
+              {/* College Filter */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-display uppercase tracking-wider text-muted-foreground">
+                  College
+                </label>
+                <Select value={collegeFilter} onValueChange={setCollegeFilter}>
+                  <SelectTrigger className="w-40 h-9 bg-background/50">
+                    <SelectValue placeholder="All Colleges" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Colleges</SelectItem>
+                    {colleges.map((college) => (
+                      <SelectItem key={college} value={college}>
+                        {college}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Position Filter */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-display uppercase tracking-wider text-muted-foreground">
+                  Position
+                </label>
+                <Select value={positionFilter} onValueChange={setPositionFilter}>
+                  <SelectTrigger className="w-32 h-9 bg-background/50">
+                    <SelectValue placeholder="All Positions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Positions</SelectItem>
+                    {positions.map((position) => (
+                      <SelectItem key={position} value={position}>
+                        {position}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Stat Filters */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-display uppercase tracking-wider text-muted-foreground">
+                  Min PPG
+                </label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={minPPG}
+                  onChange={(e) => setMinPPG(e.target.value)}
+                  className="w-20 h-9 bg-background/50"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-display uppercase tracking-wider text-muted-foreground">
+                  Min RPG
+                </label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={minRPG}
+                  onChange={(e) => setMinRPG(e.target.value)}
+                  className="w-20 h-9 bg-background/50"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-display uppercase tracking-wider text-muted-foreground">
+                  Min APG
+                </label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={minAPG}
+                  onChange={(e) => setMinAPG(e.target.value)}
+                  className="w-20 h-9 bg-background/50"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+
+              {/* Clear Filters Button */}
+              {activeFilterCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="h-9 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear All
+                </Button>
+              )}
+
+              {/* Results Count */}
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">{filteredPlayers.length}</span>
+                  {" "}player{filteredPlayers.length !== 1 ? "s" : ""} found
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
         {/* Header */}
