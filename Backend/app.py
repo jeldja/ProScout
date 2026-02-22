@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from model.archetypes import train_nba_archetypes, assign_ncaa_to_archetype, top_nba_examples, ARCHETYPE_NAMES
 
+def _round1(x):
+    return round(float(x), 1) if x is not None else None
 
 def _pick(row, candidates, default=None):
     for c in candidates:
@@ -266,16 +268,16 @@ def get_player(player_name):
         fg_pct = (twoP_pct * twoPA + threeP_pct * TPA) / (twoPA + TPA)
 
     stats = {
-        "ppg": ppg,
-        "rpg": rpg,
-        "apg": apg,
-        "spg": spg,
-        "bpg": bpg,
-        "fgPct": fg_pct,
-        "threePct": threeP_pct,
-        "ftPct": ft_pct,
-        "topg": None,  # you only have TO_per (rate), not per-game turnovers
-        "mpg": mpg,
+        "ppg": _round1(ppg),
+        "rpg": _round1(rpg),
+        "apg": _round1(apg),
+        "spg": _round1(spg),
+        "bpg": _round1(bpg),
+        "fgPct": _round1(fg_pct),
+        "threePct": _round1(threeP_pct),
+        "ftPct": _round1(ft_pct),
+        "topg": None,
+        "mpg": _round1(mpg),
     }
 
     # --- NBA comps (reuse your existing comps logic/pool) ---
@@ -288,14 +290,14 @@ def get_player(player_name):
             "name": str(r.get("Player", "")),
             "team": str(r.get("Team", "")),
             "position": str(r.get("Pos", "")),
-            "matchScore": float(r.get("similarity_score", 0.0)),
+            "matchScore": round(float(r.get("similarity_score", 0.0)), 3),
             "headshotUrl": "",  # you can fill later if you add a mapping table
             "similarities": [],
             "differences": [],
             "stats": {
-                "ppg": _to_float(r.get("PTS", 0.0)),
-                "rpg": _to_float(r.get("TRB", 0.0)),
-                "apg": _to_float(r.get("AST", 0.0)),
+                "ppg": _round1(_to_float(r.get("PTS"))),
+                "rpg": _round1(_to_float(r.get("TRB"))),
+                "apg": _round1(_to_float(r.get("AST"))),
             }
         })
 
