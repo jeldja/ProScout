@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { playerDatabase } from "@/data/playerData";
+import { usePlayers } from "@/hooks/usePlayers";
 import PlayerCard from "@/components/PlayerCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ interface PlayersProps {
 }
 
 const Players = ({ onLogout }: PlayersProps) => {
+  const { data: playerDatabase = [], isLoading, error } = usePlayers();
   const { isSaved, toggleSaved } = useSavedPlayersContext();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,14 +41,15 @@ const Players = ({ onLogout }: PlayersProps) => {
   const colleges = useMemo(() => {
     const unique = [...new Set(playerDatabase.map((p) => p.school))];
     return unique.sort();
-  }, []);
+  }, [playerDatabase]);
 
   const positions = useMemo(() => {
     const unique = [...new Set(playerDatabase.map((p) => p.position))];
     return unique.sort();
-  }, []);
+  }, [playerDatabase]);
 
   const filteredAndSortedPlayers = useMemo(() => {
+    if (!playerDatabase.length) return [];
     let list = [...playerDatabase];
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -66,7 +68,7 @@ const Players = ({ onLogout }: PlayersProps) => {
       list = list.filter((p) => p.position === positionFilter);
     }
     return list.sort((a, b) => b.draftabilityScore - a.draftabilityScore);
-  }, [searchQuery, collegeFilter, positionFilter]);
+  }, [playerDatabase, searchQuery, collegeFilter, positionFilter]);
 
   const totalPages = Math.ceil(filteredAndSortedPlayers.length / PER_PAGE) || 1;
   const currentPage = Math.min(Math.max(1, page), totalPages);
@@ -209,6 +211,16 @@ const Players = ({ onLogout }: PlayersProps) => {
       </div>
 
       <main className="mx-auto max-w-7xl px-6 py-8">
+        {isLoading && (
+          <div className="mb-6 rounded-lg border border-border bg-card/50 p-6 text-center text-muted-foreground">
+            Loading players...
+          </div>
+        )}
+        {error && (
+          <div className="mb-6 rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center text-destructive">
+            Failed to load players. Using cached/mock data.
+          </div>
+        )}
         <header className="mb-6">
           <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">
             NCAA Players

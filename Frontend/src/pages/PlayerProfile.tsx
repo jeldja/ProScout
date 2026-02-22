@@ -1,5 +1,5 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { playerDatabase } from "@/data/playerData";
+import { useParams, Link } from "react-router-dom";
+import { usePlayer } from "@/hooks/usePlayer";
 import PlayerHeader from "@/components/PlayerHeader";
 import StatCard from "@/components/StatCard";
 import ArchetypeBadge from "@/components/ArchetypeBadge";
@@ -15,11 +15,18 @@ interface PlayerProfileProps {
 
 const PlayerProfile = ({ onLogout }: PlayerProfileProps) => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { data: player, isLoading, error } = usePlayer(id);
   const { isSaved, toggleSaved } = useSavedPlayersContext();
-  const player = playerDatabase.find((p) => p.id === id);
 
-  if (!player) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center text-muted-foreground">Loading player...</div>
+      </div>
+    );
+  }
+
+  if (error || !player) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { playerDatabase } from "@/data/playerData";
+import { usePlayers } from "@/hooks/usePlayers";
 import PlayerCard from "@/components/PlayerCard";
 import { Button } from "@/components/ui/button";
 import { useSavedPlayersContext } from "@/contexts/SavedPlayersContext";
@@ -11,6 +11,7 @@ interface DashboardProps {
 
 const Dashboard = ({ onLogout }: DashboardProps) => {
   const navigate = useNavigate();
+  const { data: playerDatabase = [], isLoading } = usePlayers();
   const { savedIds, toggleSaved } = useSavedPlayersContext();
   const savedPlayers = playerDatabase.filter((p) => savedIds.includes(p.id)).sort((a, b) => b.draftabilityScore - a.draftabilityScore);
 
@@ -49,7 +50,9 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
           <p className="text-muted-foreground mt-1">Your saved prospects — click any card to view full stats and profile.</p>
         </div>
 
-        {savedPlayers.length > 0 ? (
+        {isLoading ? (
+          <p className="text-muted-foreground">Loading...</p>
+        ) : savedPlayers.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {savedPlayers.map((player) => (
               <PlayerCard
@@ -60,7 +63,7 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
               />
             ))}
           </div>
-        ) : (
+        ) : savedPlayers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-6 rounded-xl border-2 border-dashed border-border bg-card/30">
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
               <Users className="h-8 w-8 text-primary" />
@@ -73,7 +76,7 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
               <Link to="/players">Browse Players</Link>
             </Button>
           </div>
-        )}
+        ) : null}
       </main>
 
       <footer className="border-t border-border py-6">
