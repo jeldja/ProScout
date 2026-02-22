@@ -79,7 +79,7 @@ const Home = () => {
               </div>
               <h3 className="font-display text-lg font-semibold text-foreground">AI Predictions</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Machine learning models trained on 20+ years of draft data for accurate career projections.
+                Machine learning models trained on thousands of draft data for accurate career projections.
               </p>
             </div>
             <div className="glass-card rounded-xl p-6">

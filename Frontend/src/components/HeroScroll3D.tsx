@@ -20,7 +20,7 @@ const scrollSections = [
   {
     tag: "PROJECTION",
     title: "CAREER OUTCOMES",
-    description: "Machine learning models trained on 20 years of draft data predict where each prospect lands — from All-Star to role player.",
+    description: "Machine learning models trained on thousands of data to predict where each prospect lands — from All-Star to role player.",
   },
 ];
 
