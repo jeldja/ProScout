@@ -1,4 +1,6 @@
+import os
 from flask import Flask, jsonify
+from flask_cors import CORS
 from model.data_loader import load_current_ncaa_data, load_current_nba_data, make_ncaa_playstyle_df, make_nba_playstyle_df
 from model.knn_comps import build_knn_model, find_similar_players
 from model.knn_comps import FEATURE_COLS
@@ -112,6 +114,10 @@ def career_outcomes_from_score(score: float):
     ]
 
 app = Flask(__name__)
+_cors_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+if os.environ.get("FRONTEND_ORIGIN"):
+    _cors_origins.append(os.environ["FRONTEND_ORIGIN"].rstrip("/"))
+CORS(app, origins=_cors_origins, supports_credentials=True)
 
 # Load + engineer data once
 df_current = load_current_ncaa_data()
