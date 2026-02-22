@@ -39,13 +39,17 @@ const Players = ({ onLogout }: PlayersProps) => {
   const [positionFilter, setPositionFilter] = useState<string>("all");
 
   const colleges = useMemo(() => {
-    const unique = [...new Set(playerDatabase.map((p) => p.school))];
-    return unique.sort();
+    const unique = [...new Set(playerDatabase.map((p) => (p.school || "").trim()))];
+    return unique
+      .filter((c) => c && c !== "—" && c.toLowerCase() !== "n/a")
+      .sort((a, b) => a.localeCompare(b));
   }, [playerDatabase]);
 
   const positions = useMemo(() => {
-    const unique = [...new Set(playerDatabase.map((p) => p.position))];
-    return unique.sort();
+    const unique = [...new Set(playerDatabase.map((p) => (p.position || "").trim()))];
+    return unique
+      .filter((p) => p && p !== "—" && p.toLowerCase() !== "n/a")
+      .sort((a, b) => a.localeCompare(b));
   }, [playerDatabase]);
 
   const filteredAndSortedPlayers = useMemo(() => {
@@ -62,10 +66,12 @@ const Players = ({ onLogout }: PlayersProps) => {
       );
     }
     if (collegeFilter !== "all") {
-      list = list.filter((p) => p.school === collegeFilter);
+      const schoolNorm = collegeFilter.trim();
+      list = list.filter((p) => (p.school || "").trim() === schoolNorm);
     }
     if (positionFilter !== "all") {
-      list = list.filter((p) => p.position === positionFilter);
+      const posNorm = positionFilter.trim();
+      list = list.filter((p) => (p.position || "").trim() === posNorm);
     }
     return list.sort((a, b) => b.draftabilityScore - a.draftabilityScore);
   }, [playerDatabase, searchQuery, collegeFilter, positionFilter]);
