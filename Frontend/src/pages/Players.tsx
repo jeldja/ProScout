@@ -209,11 +209,21 @@ const Players = ({ onLogout }: PlayersProps) => {
       </div>
 
       <main className="mx-auto max-w-7xl px-6 py-8">
+        <header className="mb-6">
+          <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">
+            NCAA Players
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Ranked by draftability score • 10 per page
+          </p>
+        </header>
+
         <div className="space-y-4">
-          {paginatedPlayers.map((player) => (
+          {paginatedPlayers.map((player, index) => (
             <PlayerCard
               key={player.id}
               player={player}
+              rank={start + index + 1}
               isSaved={isSaved(player.id)}
               onToggleSave={toggleSaved}
             />
@@ -231,13 +241,14 @@ const Players = ({ onLogout }: PlayersProps) => {
         )}
 
         {filteredAndSortedPlayers.length > 0 && totalPages > 1 && (
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground order-2 sm:order-1">
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <p className="text-sm text-muted-foreground">
               Showing {start + 1}–{Math.min(start + PER_PAGE, filteredAndSortedPlayers.length)} of{" "}
               {filteredAndSortedPlayers.length} results
             </p>
-            <Pagination className="order-1 sm:order-2">
-              <PaginationContent>
+            {/* Google-style pagination: Prev | 1 2 3 ... 10 | Next */}
+            <Pagination className="flex-wrap justify-center">
+              <PaginationContent className="gap-0">
                 <PaginationItem>
                   <PaginationPrevious
                     href="#"
@@ -245,13 +256,17 @@ const Players = ({ onLogout }: PlayersProps) => {
                       e.preventDefault();
                       if (currentPage > 1) setPage((p) => p - 1);
                     }}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    className={
+                      currentPage === 1
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer min-w-[4rem]"
+                    }
                   />
                 </PaginationItem>
                 {pageNumbers.map((num, i) =>
                   num === "ellipsis" ? (
                     <PaginationItem key={`ellipsis-${i}`}>
-                      <PaginationEllipsis />
+                      <PaginationEllipsis className="cursor-default" />
                     </PaginationItem>
                   ) : (
                     <PaginationItem key={num}>
@@ -262,7 +277,7 @@ const Players = ({ onLogout }: PlayersProps) => {
                           setPage(num as number);
                         }}
                         isActive={currentPage === num}
-                        className="cursor-pointer"
+                        className="cursor-pointer min-w-[2.25rem] justify-center font-medium"
                       >
                         {num}
                       </PaginationLink>
@@ -276,7 +291,11 @@ const Players = ({ onLogout }: PlayersProps) => {
                       e.preventDefault();
                       if (currentPage < totalPages) setPage((p) => p + 1);
                     }}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer min-w-[4rem]"
+                    }
                   />
                 </PaginationItem>
               </PaginationContent>
