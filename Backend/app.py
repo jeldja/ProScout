@@ -5,6 +5,7 @@ from model.knn_comps import FEATURE_COLS
 import numpy as np
 import pandas as pd
 from model.archetypes import train_nba_archetypes, assign_ncaa_to_archetype, top_nba_examples, ARCHETYPE_NAMES
+from model.view_predictions import get_player_projections
 from headshots import get_nba_headshot, get_ncaa_headshot
 
 def _round1(x):
@@ -315,8 +316,19 @@ def get_player(player_name):
 
     primary_comp = comps[0]["name"] if len(comps) > 0 else ""
 
-    # --- Draftability + outcomes, this is dummy ---
-    draft_score = compute_draftability_score(stats, archetype_conf)
+    # --- Draftability + outcomes: use model predictions (draftability.py + view_predictions) when available ---
+    proj = get_player_projections(name_key)
+    if proj:
+        draft_score = proj["draftability_score"]
+        career_projections = {
+            "peak_bpm": _round1(proj["peak_bpm"]),
+            "peak_vorp": _round1(proj["peak_vorp"]),
+            "peak_pts": _round1(proj["peak_pts"]),
+            "peak_mp": _round1(proj["peak_mp"]),
+        }
+    else:
+        draft_score = compute_draftability_score(stats, archetype_conf)
+        career_projections = None  # fallback when player not in predictions CSV
     outcomes = career_outcomes_from_score(draft_score)
 
     # --- Build Player object (match TS interface) ---
@@ -338,6 +350,7 @@ def get_player(player_name):
         "nbaComparisons": comps,
         "stats": stats,
         "careerOutcomes": outcomes,
+        "careerProjections": career_projections,  # peak_bpm, peak_vorp, peak_pts, peak_mp from model
         "seasonLog": [],       # fill later if you add season-by-season NCAA data
         "strengths": [],       # fill later (or generate heuristically)
         "weaknesses": [],      # fill later

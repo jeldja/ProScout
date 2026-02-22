@@ -17,6 +17,14 @@ export interface CareerOutcome {
   description: string;
 }
 
+/** Projected NBA peak stats from draftability model */
+export interface CareerProjections {
+  peak_bpm: number;
+  peak_vorp: number;
+  peak_pts: number;
+  peak_mp: number;
+}
+
 export interface SeasonLog {
   season: string;
   ppg: number;
@@ -55,6 +63,7 @@ export interface Player {
   nbaComparisons: NBAComparison[];
   stats: PlayerStats;
   careerOutcomes: CareerOutcome[];
+  careerProjections?: CareerProjections | null;
   seasonLog: SeasonLog[];
   strengths: string[];
   weaknesses: string[];
@@ -145,6 +154,7 @@ export const playerDatabase: Player[] = [
       { outcome: "Role Player", probability: 18, description: "Bench contributor with specific skill set" },
       { outcome: "Out of League", probability: 8, description: "Exits NBA within 3 seasons" },
     ],
+    careerProjections: { peak_bpm: 2.4, peak_vorp: 1.8, peak_pts: 16.2, peak_mp: 2100 },
     seasonLog: [
       { season: "2022-23", ppg: 10.2, rpg: 2.8, apg: 4.5, fgPct: 42.1 },
       { season: "2023-24", ppg: 14.8, rpg: 3.3, apg: 5.9, fgPct: 44.0 },

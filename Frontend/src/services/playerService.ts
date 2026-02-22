@@ -23,6 +23,7 @@ function slugToName(slug: string): string {
 function normalizePlayer(p: Record<string, unknown>): Player {
   const conf = p.archetypeConfidence as number;
   const outcomes = (p.careerOutcomes as Array<{ outcome: string; probability: number; description: string }>) || [];
+  const proj = p.careerProjections as { peak_bpm?: number; peak_vorp?: number; peak_pts?: number; peak_mp?: number } | null | undefined;
   return {
     id: String(p.id ?? ""),
     name: String(p.name ?? ""),
@@ -45,6 +46,14 @@ function normalizePlayer(p: Record<string, unknown>): Player {
       probability: typeof o.probability === "number" ? (o.probability <= 1 ? o.probability * 100 : o.probability) : 0,
       description: o.description ?? "",
     })),
+    careerProjections: proj && typeof proj.peak_bpm === "number"
+      ? {
+          peak_bpm: proj.peak_bpm,
+          peak_vorp: proj.peak_vorp ?? 0,
+          peak_pts: proj.peak_pts ?? 0,
+          peak_mp: proj.peak_mp ?? 0,
+        }
+      : null,
     seasonLog: Array.isArray(p.seasonLog) ? (p.seasonLog as Player["seasonLog"]) : [],
     strengths: Array.isArray(p.strengths) ? (p.strengths as string[]) : [],
     weaknesses: Array.isArray(p.weaknesses) ? (p.weaknesses as string[]) : [],

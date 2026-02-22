@@ -130,6 +130,33 @@ const PlayerProfile = ({ onLogout }: PlayerProfileProps) => {
               AI Model v3.2
             </span>
           </div>
+          {/* Draftability score + projected peak stats from model */}
+          <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <div className="rounded-lg bg-secondary/40 px-4 py-3 text-center">
+              <span className="block font-display text-xs uppercase tracking-wider text-muted-foreground">Draft Score</span>
+              <span className="mt-1 block text-lg font-bold text-primary">{player.draftabilityScore}</span>
+            </div>
+            {player.careerProjections && (
+              <>
+                <div className="rounded-lg bg-secondary/40 px-4 py-3 text-center">
+                  <span className="block font-display text-xs uppercase tracking-wider text-muted-foreground">Peak BPM</span>
+                  <span className="mt-1 block text-lg font-bold text-foreground">{player.careerProjections.peak_bpm}</span>
+                </div>
+                <div className="rounded-lg bg-secondary/40 px-4 py-3 text-center">
+                  <span className="block font-display text-xs uppercase tracking-wider text-muted-foreground">Peak VORP</span>
+                  <span className="mt-1 block text-lg font-bold text-foreground">{player.careerProjections.peak_vorp}</span>
+                </div>
+                <div className="rounded-lg bg-secondary/40 px-4 py-3 text-center">
+                  <span className="block font-display text-xs uppercase tracking-wider text-muted-foreground">Peak PTS</span>
+                  <span className="mt-1 block text-lg font-bold text-foreground">{player.careerProjections.peak_pts}</span>
+                </div>
+                <div className="rounded-lg bg-secondary/40 px-4 py-3 text-center">
+                  <span className="block font-display text-xs uppercase tracking-wider text-muted-foreground">Peak MP</span>
+                  <span className="mt-1 block text-lg font-bold text-foreground">{player.careerProjections.peak_mp}</span>
+                </div>
+              </>
+            )}
+          </div>
           <div className="space-y-3">
             {player.careerOutcomes.map((outcome, i) => (
               <CareerOutcomeBar key={outcome.outcome} outcome={outcome} index={i} />
