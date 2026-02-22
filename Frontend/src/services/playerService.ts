@@ -1,110 +1,56 @@
 /**
- * Player API service — fetches from backend, falls back to mock data when backend unavailable.
+ * Player API service — fetches from backend /player endpoint, falls back to mock when unavailable.
  */
 
 import { apiGet } from "./api";
-import type { Player, NBAComparison, PlayerStats } from "@/data/playerData";
+import type { Player } from "@/data/playerData";
 import { playerDatabase } from "@/data/playerData";
-
-// Backend API response types
-interface ArchetypeResponse {
-  player: string;
-  archetype: string;
-  confidence: number;
-  stats: Record<string, number>;
-}
-
-interface CompRecord {
-  Player?: string;
-  Team?: string;
-  Pos?: string;
-  PTS?: number;
-  AST?: number;
-  TRB?: number;
-  MP?: number;
-  similarity_score?: number;
-}
 
 const USE_MOCK = false; // Set to true to force mock data (e.g. when backend is down)
 
-function slugify(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-}
-
-function titleCase(str: string): string {
-  return str.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
-}
-
-function mapArchetypeToPlayer(
-  name: string,
-  archetype: ArchetypeResponse,
-  comps: CompRecord[]
-): Player {
-  const id = slugify(name);
-  const statsData = archetype.stats || {};
-
-  const gp = statsData.GP ?? 1;
-  const stats: PlayerStats = {
-    ppg: Math.round(((statsData.PTS ?? 0) / gp) * 10) / 10,
-    rpg: Math.round(((statsData.TRB ?? 0) / gp) * 10) / 10,
-    apg: Math.round(((statsData.AST ?? 0) / gp) * 10) / 10,
-    spg: 0,
-    bpg: 0,
-    fgPct: Math.round((statsData.TS_per ?? 0) * 100) / 100,
-    threePct: 0,
-    ftPct: Math.round((statsData.TS_per ?? 0) * 100) / 100,
-    topg: 0,
-    mpg: Math.round((statsData.Min_per ?? 0) * 10) / 10,
-  };
-
-  const nbaComparisons: NBAComparison[] = comps
-    .filter((c) => c.Player)
-    .map((c, i) => ({
-      name: c.Player!,
-      team: c.Team ?? "Unknown",
-      position: c.Pos ?? "—",
-      matchScore: Math.round((c.similarity_score ?? 0.9 - i * 0.05) * 100),
-      headshotUrl: `https://api.dicebear.com/7.x/avataaars/png?seed=${encodeURIComponent(c.Player!)}&backgroundColor=1e3a5f&radius=50`,
-      similarities: [],
-      differences: [],
-      stats: {
-        ppg: Math.round(((c.PTS ?? 0) / 82) * 10) / 10,
-        rpg: Math.round(((c.TRB ?? 0) / 82) * 10) / 10,
-        apg: Math.round(((c.AST ?? 0) / 82) * 10) / 10,
-      },
-    }));
-
-  const confidencePercent = Math.round((archetype.confidence ?? 0) * 100);
-  const topComp = nbaComparisons[0];
-
-  return {
-    id,
-    name: titleCase(archetype.player),
-    headshotUrl: `https://api.dicebear.com/7.x/avataaars/png?seed=${encodeURIComponent(id)}&backgroundColor=1e3a5f&radius=50`,
-    school: "NCAA",
-    year: "—",
-    position: "—",
-    height: "—",
-    weight: "—",
-    archetype: archetype.archetype,
-    archetypeConfidence: confidencePercent,
-    nbaComp: topComp?.name ?? "—",
-    nbaComparisons,
-    stats,
-    careerOutcomes: [
-      { outcome: "Quality Starter", probability: Math.min(40, confidencePercent), description: "Based on archetype fit" },
-      { outcome: "Solid Rotation", probability: 30, description: "Rotation player potential" },
-      { outcome: "Role Player", probability: 20, description: "Bench contributor" },
-      { outcome: "Out of League", probability: Math.max(10, 100 - confidencePercent), description: "Exits within 5 seasons" },
-    ],
-    seasonLog: [{ season: "2024-25", ppg: stats.ppg, rpg: stats.rpg, apg: stats.apg, fgPct: stats.fgPct }],
-    strengths: ["Archetype fit", "NBA comps identified"],
-    weaknesses: [],
-    draftabilityScore: confidencePercent,
-  };
-}
-
 let cachedPlayers: Player[] | null = null;
+
+/**
+ * Convert slug (marcus-williams) to API-friendly name (marcus williams)
+ */
+function slugToName(slug: string): string {
+  return decodeURIComponent(slug).replace(/-/g, " ");
+}
+
+/**
+ * Normalize backend response to Player type (handles both formats)
+ */
+function normalizePlayer(p: Record<string, unknown>): Player {
+  const conf = p.archetypeConfidence as number;
+  const outcomes = (p.careerOutcomes as Array<{ outcome: string; probability: number; description: string }>) || [];
+  return {
+    id: String(p.id ?? ""),
+    name: String(p.name ?? ""),
+    headshotUrl: String(p.headshotUrl ?? ""),
+    school: String(p.school ?? ""),
+    year: String(p.year ?? ""),
+    position: String(p.position ?? ""),
+    height: String(p.height ?? ""),
+    weight: String(p.weight ?? ""),
+    archetype: String(p.archetype ?? ""),
+    archetypeConfidence: typeof conf === "number" ? (conf <= 1 ? conf * 100 : conf) : 0,
+    nbaComp: String(p.nbaComp ?? ""),
+    nbaComparisons: Array.isArray(p.nbaComparisons) ? (p.nbaComparisons as Player["nbaComparisons"]) : [],
+    stats: (p.stats as Player["stats"]) ?? {
+      ppg: 0, rpg: 0, apg: 0, spg: 0, bpg: 0,
+      fgPct: 0, threePct: 0, ftPct: 0, topg: 0, mpg: 0,
+    },
+    careerOutcomes: outcomes.map((o) => ({
+      outcome: o.outcome,
+      probability: typeof o.probability === "number" ? (o.probability <= 1 ? o.probability * 100 : o.probability) : 0,
+      description: o.description ?? "",
+    })),
+    seasonLog: Array.isArray(p.seasonLog) ? (p.seasonLog as Player["seasonLog"]) : [],
+    strengths: Array.isArray(p.strengths) ? (p.strengths as string[]) : [],
+    weaknesses: Array.isArray(p.weaknesses) ? (p.weaknesses as string[]) : [],
+    draftabilityScore: Number(p.draftabilityScore ?? 0),
+  };
+}
 
 /**
  * Fetch all players from backend. Falls back to mock data on error.
@@ -119,15 +65,17 @@ export async function fetchPlayers(): Promise<Player[]> {
     if (!names?.length) return playerDatabase;
 
     const players: Player[] = [];
-    for (const name of names.slice(0, 50)) {
+    const toFetch = names.slice(0, 50);
+
+    for (const name of toFetch) {
       try {
-        const [archetype, comps] = await Promise.all([
-          apiGet<ArchetypeResponse>(`archetype/${encodeURIComponent(name)}`),
-          apiGet<CompRecord[]>(`comps/${encodeURIComponent(name)}`).catch(() => []),
-        ]);
-        players.push(mapArchetypeToPlayer(name, archetype, Array.isArray(comps) ? comps : []));
+        const nameForApi = typeof name === "string" ? name : String(name);
+        const res = await apiGet<Record<string, unknown>>(
+          `player/${encodeURIComponent(nameForApi.replace(/\s+/g, "-"))}`
+        );
+        if (res && res.id) players.push(normalizePlayer(res));
       } catch {
-        // Skip player if archetype/comps fail
+        // Skip player if fetch fails
       }
     }
 
@@ -151,23 +99,13 @@ export async function fetchPlayerById(id: string): Promise<Player | null> {
   }
 
   const mockPlayer = playerDatabase.find((p) => p.id === id);
-  const nameFromSlug = id.replace(/-/g, " ");
-
-  const nameForApi = nameFromSlug.toLowerCase();
+  const nameForApi = slugToName(id);
 
   try {
-    const [archetype, comps] = await Promise.all([
-      apiGet<ArchetypeResponse>(`archetype/${encodeURIComponent(nameForApi)}`).catch(() => null),
-      apiGet<CompRecord[]>(`comps/${encodeURIComponent(nameForApi)}`).catch(() => []),
-    ]);
-
-    if (archetype) {
-      return mapArchetypeToPlayer(
-        archetype.player,
-        archetype,
-        Array.isArray(comps) ? comps : []
-      );
-    }
+    const res = await apiGet<Record<string, unknown>>(
+      `player/${encodeURIComponent(nameForApi.replace(/\s+/g, "-"))}`
+    );
+    if (res && res.id) return normalizePlayer(res);
   } catch {
     // Fall through to mock
   }

@@ -5,6 +5,7 @@ from model.knn_comps import FEATURE_COLS
 import numpy as np
 import pandas as pd
 from model.archetypes import train_nba_archetypes, assign_ncaa_to_archetype, top_nba_examples, ARCHETYPE_NAMES
+from headshots import get_nba_headshot, get_ncaa_headshot
 
 def _round1(x):
     return round(float(x), 1) if x is not None else None
@@ -83,7 +84,7 @@ def career_outcomes_from_score(score: float):
     }
 
     return [
-        {"outcome": k, "probability": float(v), "description": descriptions[k]}
+        {"outcome": k, "probability": round(float(v) * 100, 1), "description": descriptions[k]}
         for k, v in probs.items()
     ]
 
@@ -231,7 +232,8 @@ def get_archetype(player_name):
 
 @app.get("/player/<player_name>")
 def get_player(player_name):
-    name_key = player_name.strip().lower()
+    # Accept slug (marcus-williams) or name (marcus williams)
+    name_key = player_name.strip().lower().replace("-", " ")
 
     # NCAA lookup uses df_current["player_name"] (already normalized in your app)
     match = df_current[df_current["player_name"] == name_key]
@@ -286,12 +288,13 @@ def get_player(player_name):
 
     comps = []
     for _, r in comps_df.iterrows():
+        nba_name = str(r.get("Player", ""))
         comps.append({
-            "name": str(r.get("Player", "")),
+            "name": nba_name,
             "team": str(r.get("Team", "")),
             "position": str(r.get("Pos", "")),
             "matchScore": round(float(r.get("similarity_score", 0.0)), 3),
-            "headshotUrl": "",  # you can fill later if you add a mapping table
+            "headshotUrl": get_nba_headshot(nba_name),  # you can fill later if you add a mapping table
             "similarities": [],
             "differences": [],
             "stats": {
@@ -309,18 +312,19 @@ def get_player(player_name):
 
     # --- Build Player object (match TS interface) ---
     name = str(row.get("player_name", player_name))
+    school = str(_pick(row, ["School", "school", "Team", "team"], default=""))
 
     player_payload = {
         "id": _slug_id(name),
-        "name": name,
-        "headshotUrl": "",  # optional for now
-        "school": str(_pick(row, ["School", "school", "Team", "team"], default="")),
+        "name": name.title(),
+        "headshotUrl": get_ncaa_headshot(name, school=school),
+        "school": school,
         "year": str(_pick(row, ["Year", "year", "Class", "class"], default="")),
         "position": str(_pick(row, ["Pos", "pos", "Position", "position"], default="")),
         "height": str(_pick(row, ["Height", "height"], default="")),
         "weight": str(_pick(row, ["Weight", "weight"], default="")),
         "archetype": archetype_name,
-        "archetypeConfidence": round(float(archetype_conf), 4),
+        "archetypeConfidence": round(float(archetype_conf) * 100, 1),
         "nbaComp": primary_comp,
         "nbaComparisons": comps,
         "stats": stats,

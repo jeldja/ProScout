@@ -11,7 +11,17 @@ const outcomeStyles: Record<string, { bg: string; glow: string; icon: string }> 
     glow: "shadow-green-500/40",
     icon: "🌟"
   },
+  "Star": { 
+    bg: "bg-gradient-to-r from-green-500 to-emerald-400", 
+    glow: "shadow-green-500/40",
+    icon: "🌟"
+  },
   "Quality Starter": { 
+    bg: "bg-gradient-to-r from-blue-500 to-cyan-400", 
+    glow: "shadow-blue-500/40",
+    icon: "💪"
+  },
+  "Starter": { 
     bg: "bg-gradient-to-r from-blue-500 to-cyan-400", 
     glow: "shadow-blue-500/40",
     icon: "💪"
@@ -21,10 +31,20 @@ const outcomeStyles: Record<string, { bg: string; glow: string; icon: string }> 
     glow: "shadow-orange-500/40",
     icon: "🔄"
   },
+  "Rotation": { 
+    bg: "bg-gradient-to-r from-orange-500 to-amber-400", 
+    glow: "shadow-orange-500/40",
+    icon: "🔄"
+  },
   "Role Player": { 
     bg: "bg-gradient-to-r from-yellow-500 to-yellow-400", 
     glow: "shadow-yellow-500/40",
     icon: "👤"
+  },
+  "Long Shot": { 
+    bg: "bg-gradient-to-r from-red-500 to-rose-400", 
+    glow: "shadow-red-500/40",
+    icon: "📉"
   },
   "Out of League": { 
     bg: "bg-gradient-to-r from-red-500 to-rose-400", 

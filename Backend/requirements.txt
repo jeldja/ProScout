@@ -1,0 +1,7 @@
+flask
+pandas
+numpy
+scikit-learn
+openpyxl
+# Optional: nba_api for real NBA headshots (falls back to placeholder if not installed)
+nba_api>=1.4.0
