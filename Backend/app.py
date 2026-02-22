@@ -105,17 +105,17 @@ kmeans_archetypes, df_nba_labeled, _centroids_df = train_nba_archetypes(df_nba, 
 df_current["player_name"] = df_current["player_name"].astype(str).str.strip().str.lower()
 df_nba["Player"] = df_nba["Player"].astype(str).str.strip()
 
-# Testing
-df_current = df_current[
-    (df_current["AST_per"] <= 60) &
-    (df_current["TO_per"] <= 60) &
-    (df_current["ORB_per"] <= 50) &
-    (df_current["DRB_per"] <= 60)
-]
 
-# Optional but highly recommended
-df_current = df_current[df_current["Min_per"] > 10]
+# filter
+df_current = df_current[df_current["Min_per"] > 60]
 df_current = df_current[df_current["GP"] > 10]
+df_current = df_current[df_current['pts'] > 10.0]
+POWER4 = {"B10", "B12", "SEC", "ACC"}
+
+df_current["conf"] = df_current["conf"].astype(str).str.strip()
+df_current = df_current[df_current["conf"].isin(POWER4)].copy()
+
+print(df_current.shape)
 # Build KNN ON NBA once
 knn, scaler, df_nba_clean = build_knn_model(df_nba)
 
@@ -241,6 +241,15 @@ def get_player(player_name):
         return jsonify({"error": f"Player not found: {player_name}"}), 404
 
     row = match.iloc[0]
+
+    x_feat = pd.to_numeric(row[FEATURE_COLS], errors="coerce")
+    if x_feat.isna().any():
+        missing = x_feat.isna().sum()
+        return jsonify({
+            "error": "Player has missing feature data (cannot compute archetype/comps)",
+            "player": row.get("player_name", player_name),
+            "missing_feature_count": int(missing),
+        }), 400
 
     # --- Archetype ---
     cluster_id, archetype_name, archetype_conf, _ = assign_ncaa_to_archetype(row, kmeans_archetypes)

@@ -65,7 +65,7 @@ export async function fetchPlayers(): Promise<Player[]> {
     if (!names?.length) return playerDatabase;
 
     const players: Player[] = [];
-    const toFetch = names.slice(0, 50);
+    const toFetch = names;
 
     for (const name of toFetch) {
       try {
