@@ -3,7 +3,6 @@ import PlayerHeader from "@/components/PlayerHeader";
 import StatCard from "@/components/StatCard";
 import ArchetypeBadge from "@/components/ArchetypeBadge";
 import CareerOutcomeBar from "@/components/CareerOutcomeBar";
-import SkillTags from "@/components/SkillTags";
 import HeroScroll3D from "@/components/HeroScroll3D";
 
 const Index = () => {
@@ -52,19 +51,12 @@ const Index = () => {
           <StatCard label="MPG" value={player.stats.mpg} />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Archetype */}
-          <ArchetypeBadge
-            archetype={player.archetype}
-            confidence={player.archetypeConfidence}
-            nbaComp={player.nbaComp}
-            playerName={player.name}
-            nbaComparisons={player.nbaComparisons}
-          />
-
-          {/* Scouting Notes */}
-          <SkillTags strengths={player.strengths} weaknesses={player.weaknesses} />
-        </div>
+        <ArchetypeBadge
+          archetype={player.archetype}
+          nbaComp={player.nbaComp}
+          playerName={player.name}
+          nbaComparisons={player.nbaComparisons}
+        />
 
         {/* Career Outcomes */}
         <div className="glass-card rounded-xl p-6">

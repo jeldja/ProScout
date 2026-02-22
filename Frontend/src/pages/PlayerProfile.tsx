@@ -4,7 +4,6 @@ import PlayerHeader from "@/components/PlayerHeader";
 import StatCard from "@/components/StatCard";
 import ArchetypeBadge from "@/components/ArchetypeBadge";
 import CareerOutcomeBar from "@/components/CareerOutcomeBar";
-import SkillTags from "@/components/SkillTags";
 import { Button } from "@/components/ui/button";
 import { useSavedPlayersContext } from "@/contexts/SavedPlayersContext";
 import { Bookmark, BookmarkCheck, ArrowLeft } from "lucide-react";
@@ -110,16 +109,12 @@ const PlayerProfile = ({ onLogout }: PlayerProfileProps) => {
           <StatCard label="MPG" value={player.stats.mpg} />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <ArchetypeBadge
-            archetype={player.archetype}
-            confidence={player.archetypeConfidence}
-            nbaComp={player.nbaComp}
-            playerName={player.name}
-            nbaComparisons={player.nbaComparisons}
-          />
-          <SkillTags strengths={player.strengths} weaknesses={player.weaknesses} />
-        </div>
+        <ArchetypeBadge
+          archetype={player.archetype}
+          nbaComp={player.nbaComp}
+          playerName={player.name}
+          nbaComparisons={player.nbaComparisons}
+        />
 
         <div className="glass-card-3d rounded-xl p-6">
           <div className="mb-6 flex items-center justify-between">

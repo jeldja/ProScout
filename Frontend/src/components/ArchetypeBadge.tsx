@@ -5,17 +5,13 @@ import { ChevronRight, Users } from "lucide-react";
 
 interface ArchetypeBadgeProps {
   archetype: string;
-  confidence: number;
   nbaComp: string;
   playerName: string;
   nbaComparisons: NBAComparison[];
 }
 
-const ArchetypeBadge = ({ archetype, confidence, nbaComp, playerName, nbaComparisons }: ArchetypeBadgeProps) => {
+const ArchetypeBadge = ({ archetype, nbaComp, playerName, nbaComparisons }: ArchetypeBadgeProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const circumference = 2 * Math.PI * 36;
-  const strokeDashoffset = circumference - (confidence / 100) * circumference;
-
   const topComp = nbaComparisons[0];
 
   return (
@@ -25,37 +21,8 @@ const ArchetypeBadge = ({ archetype, confidence, nbaComp, playerName, nbaCompari
           Predicted Archetype
         </p>
 
-        <div className="mt-4 flex items-center gap-5">
-          {/* Circular progress */}
-          <div className="relative h-24 w-24 flex-shrink-0">
-            <svg className="h-24 w-24 -rotate-90" viewBox="0 0 96 96">
-              <defs>
-                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="hsl(24 100% 55%)" />
-                  <stop offset="100%" stopColor="hsl(15 100% 45%)" />
-                </linearGradient>
-              </defs>
-              <circle cx="48" cy="48" r="42" fill="none" stroke="hsl(var(--secondary))" strokeWidth="6" />
-              <circle
-                cx="48"
-                cy="48"
-                r="42"
-                fill="none"
-                stroke="url(#progressGradient)"
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeDasharray={2 * Math.PI * 42}
-                strokeDashoffset={(2 * Math.PI * 42) - (confidence / 100) * (2 * Math.PI * 42)}
-                className="transition-all duration-1000 ease-out"
-                style={{ filter: "drop-shadow(0 0 8px hsl(24 100% 50% / 0.5))" }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="font-display text-xl font-bold text-gradient">{confidence}%</span>
-            </div>
-          </div>
-
-          <div className="flex-1">
+        <div className="mt-4 flex flex-col gap-4">
+          <div>
             <h3 className="text-xl font-bold text-foreground">{archetype}</h3>
             
             {/* Clickable NBA Comp */}

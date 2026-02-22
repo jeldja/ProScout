@@ -148,11 +148,10 @@ export const playerDatabase: Player[] = [
       mpg: 34.6,
     },
     careerOutcomes: [
-      { outcome: "All-Star", probability: 12, description: "Multiple All-Star selections, franchise cornerstone" },
-      { outcome: "Quality Starter", probability: 34, description: "Consistent starter averaging 14+ PPG for 8+ seasons" },
-      { outcome: "Solid Rotation", probability: 28, description: "Reliable rotation player with 7+ year career" },
-      { outcome: "Role Player", probability: 18, description: "Bench contributor with specific skill set" },
-      { outcome: "Out of League", probability: 8, description: "Exits NBA within 3 seasons" },
+      { outcome: "BPM vs Peers", probability: 78, description: "Box Plus/Minus estimates total contribution per 100 possessions — efficiency and impact on winning." },
+      { outcome: "VORP vs Peers", probability: 72, description: "Value Over Replacement Player measures impact above a replacement-level player — how much they elevate a team." },
+      { outcome: "PTS vs Peers", probability: 65, description: "Projected points per game at peak — scoring output when they hit their stride." },
+      { outcome: "MP vs Peers", probability: 81, description: "Expected minutes per game — reflects the size and importance of their role." },
     ],
     careerProjections: { peak_bpm: 2.4, peak_vorp: 1.8, peak_pts: 16.2, peak_mp: 2100 },
     seasonLog: [

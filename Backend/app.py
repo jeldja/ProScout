@@ -62,12 +62,34 @@ def compute_draftability_score(stats: dict, archetype_conf: float) -> float:
 
     return _clamp(score, 0.0, 100.0)
 
+def career_outcomes_from_projections(proj: dict):
+    """
+    Build career outcome bars from percentile data (peak_*_pct).
+    Star -> BPM vs Peers, Starter -> VORP vs Peers, Rotation -> PTS vs Peers, Long Shot -> MP vs Peers.
+    """
+    descriptions = {
+        "BPM vs Peers": "Box Plus/Minus estimates total contribution per 100 possessions — efficiency and impact on winning.",
+        "VORP vs Peers": "Value Over Replacement Player measures impact above a replacement-level player — how much they elevate a team.",
+        "PTS vs Peers": "Projected points per game at peak — scoring output when they hit their stride.",
+        "MP vs Peers": "Expected minutes per game — reflects the size and importance of their role.",
+    }
+    mapping = [
+        ("BPM vs Peers", proj.get("peak_bpm_pct", 50)),
+        ("VORP vs Peers", proj.get("peak_vorp_pct", 50)),
+        ("PTS vs Peers", proj.get("peak_pts_pct", 50)),
+        ("MP vs Peers", proj.get("peak_mp_pct", 50)),
+    ]
+    return [
+        {"outcome": k, "probability": round(min(100, max(0, float(v))), 1), "description": descriptions[k]}
+        for k, v in mapping
+    ]
+
+
 def career_outcomes_from_score(score: float):
     """
-    Produces probabilities that sum to 1.
-    Outcomes are derived from draftabilityScore.
+    Fallback when player not in predictions CSV.
+    Produces probabilities that sum to 1, derived from draftabilityScore.
     """
-    # Simple piecewise baselines
     if score >= 85:
         probs = {"Star": 0.35, "Starter": 0.45, "Rotation": 0.18, "Long Shot": 0.02}
     elif score >= 70:
@@ -326,10 +348,11 @@ def get_player(player_name):
             "peak_pts": _round1(proj["peak_pts"]),
             "peak_mp": _round1(proj["peak_mp"]),
         }
+        outcomes = career_outcomes_from_projections(proj)
     else:
         draft_score = compute_draftability_score(stats, archetype_conf)
         career_projections = None  # fallback when player not in predictions CSV
-    outcomes = career_outcomes_from_score(draft_score)
+        outcomes = career_outcomes_from_score(draft_score)
 
     # --- Build Player object (match TS interface) ---
     name = str(row.get("player_name", player_name))

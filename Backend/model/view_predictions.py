@@ -22,9 +22,9 @@ def _load_predictions() -> pd.DataFrame:
 
 def get_player_projections(player_name: str) -> dict | None:
     """
-    Look up projected NBA peak stats and draftability for a player.
-    Returns dict with: peak_bpm, peak_vorp, peak_pts, peak_mp, draftability_score
-    or None if player not found.
+    Look up projected NBA peak stats, percentiles, and draftability for a player.
+    Returns dict with: peak_bpm, peak_vorp, peak_pts, peak_mp, draftability_score,
+    and peak_bpm_pct, peak_vorp_pct, peak_pts_pct, peak_mp_pct (0-100 percentile vs peers).
     """
     try:
         df = _load_predictions()
@@ -42,5 +42,9 @@ def get_player_projections(player_name: str) -> dict | None:
         "peak_vorp": float(row.get("peak_vorp", 0)),
         "peak_pts": float(row.get("peak_pts", 0)),
         "peak_mp": float(row.get("peak_mp", 0)),
+        "peak_bpm_pct": float(row.get("peak_bpm_pct", 50)),
+        "peak_vorp_pct": float(row.get("peak_vorp_pct", 50)),
+        "peak_pts_pct": float(row.get("peak_pts_pct", 50)),
+        "peak_mp_pct": float(row.get("peak_mp_pct", 50)),
         "draftability_score": float(row.get("draftability_score", 0)),
     }
