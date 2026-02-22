@@ -63,6 +63,7 @@ const NBAComparisonModal = ({
                       src={comp.headshotUrl}
                       alt={comp.name}
                       className="w-12 h-12 rounded-full object-cover object-top bg-secondary headshot-glow"
+                      referrerPolicy="no-referrer"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(comp.name)}&background=1a1a2e&color=ff6b35&bold=true`;
                       }}
@@ -90,6 +91,7 @@ const NBAComparisonModal = ({
                     src={selectedComp.headshotUrl}
                     alt={selectedComp.name}
                     className="w-24 h-24 rounded-2xl object-cover object-top bg-secondary headshot-glow"
+                    referrerPolicy="no-referrer"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedComp.name)}&background=1a1a2e&color=ff6b35&bold=true&size=128`;
                     }}

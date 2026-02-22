@@ -68,6 +68,7 @@ const ArchetypeBadge = ({ archetype, confidence, nbaComp, playerName, nbaCompari
                   src={topComp.headshotUrl}
                   alt={nbaComp}
                   className="w-10 h-10 rounded-full object-cover object-top bg-secondary headshot-glow"
+                  referrerPolicy="no-referrer"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nbaComp)}&background=1a1a2e&color=ff6b35&bold=true`;
                   }}

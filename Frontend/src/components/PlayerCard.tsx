@@ -75,6 +75,7 @@ const PlayerCard = ({ player, isSaved = false, onToggleSave, rank }: PlayerCardP
               src={player.headshotUrl}
               alt={player.name}
               className="h-full w-full object-cover"
+              referrerPolicy="no-referrer"
               onError={(e) => {
                 const img = e.target as HTMLImageElement;
                 img.style.display = "none";
