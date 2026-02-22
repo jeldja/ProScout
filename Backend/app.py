@@ -293,7 +293,7 @@ def get_player(player_name):
             "name": nba_name,
             "team": str(r.get("Team", "")),
             "position": str(r.get("Pos", "")),
-            "matchScore": round(float(r.get("similarity_score", 0.0)), 3),
+            "matchScore": round(float(r.get("similarity_score", 0.0) * 100), 0),
             "headshotUrl": get_nba_headshot(nba_name),  # you can fill later if you add a mapping table
             "similarities": [],
             "differences": [],
