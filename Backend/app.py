@@ -4,6 +4,7 @@ from model.knn_comps import build_knn_model, find_similar_players
 from model.knn_comps import FEATURE_COLS
 import numpy as np
 import pandas as pd
+from model.archetypes import train_nba_archetypes, assign_ncaa_to_archetype, top_nba_examples, ARCHETYPE_NAMES
 
 
 app = Flask(__name__)
@@ -14,6 +15,10 @@ df_nba = load_current_nba_data()
 
 df_current = make_ncaa_playstyle_df(df_current)
 df_nba = make_nba_playstyle_df(df_nba)
+
+K_ARCHETYPES = 8
+kmeans_archetypes, df_nba_labeled, _centroids_df = train_nba_archetypes(df_nba, k=K_ARCHETYPES, min_mp=1500)
+
 
 # Normalize player name column for lookup
 df_current["player_name"] = df_current["player_name"].astype(str).str.strip().str.lower()
@@ -105,6 +110,44 @@ def get_comps(player_name):
     result = comps[cols].to_dict(orient="records")
 
     return jsonify(result)
+
+
+@app.get("/archetype/<player_name>")
+def get_archetype(player_name):
+    name_key = player_name.strip().lower()
+
+    row = df_current[df_current["player_name"] == name_key]
+    if row.empty:
+        return jsonify({"error": f"Player not found: {player_name}"}), 404
+
+    player_row = row.iloc[0]
+
+    cluster_id, archetype_name, confidence, _ = assign_ncaa_to_archetype(
+        player_row, kmeans_archetypes
+    )
+
+    # Choose which stats you want displayed
+    stat_cols = [
+        "PTS", "AST", "TRB", "usg",
+        "ORB_per", "DRB_per", "AST_per",
+        "TS_per", "Min_per", "GP"
+    ]
+
+    # Only keep stats that actually exist
+    stat_cols = [c for c in stat_cols if c in df_current.columns]
+
+    stats_payload = {
+        col: float(player_row[col])
+        for col in stat_cols
+        if pd.notna(player_row[col])
+    }
+
+    return jsonify({
+        "player": player_row["player_name"],
+        "archetype": archetype_name,
+        "confidence": round(float(confidence), 4),
+        "stats": stats_payload
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)
