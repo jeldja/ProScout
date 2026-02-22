@@ -43,7 +43,7 @@ def compute_draftability_score(stats: dict, archetype_conf: float) -> float:
     tp = stats.get("threePct", 0.0)
     ft = stats.get("ftPct", 0.0)
     bpg = stats.get("bpg", 0.0)
-    tov = stats.get("topg", 0.0)
+    tov = stats.get("topg") or 0.0
     mpg = stats.get("mpg", 0.0)
 
     score = 40.0
@@ -242,17 +242,40 @@ def get_player(player_name):
     cluster_id, archetype_name, archetype_conf, _ = assign_ncaa_to_archetype(row, kmeans_archetypes)
 
     # --- Stats for your UI (match TS interface camelCase) ---
+    # Minutes per game
+    min_per = _to_float(_pick(row, ["Min_per"]), default=None)
+    mpg = min_per * 40 * .01 if min_per is not None else None
+
+    # Per-game stats (your dataset already has per-game columns like pts, ast, treb)
+    ppg = _to_float(_pick(row, ["pts"]), default=None)
+    rpg = _to_float(_pick(row, ["treb"]), default=None)
+    apg = _to_float(_pick(row, ["ast"]), default=None)
+    spg = _to_float(_pick(row, ["stl"]), default=None)
+    bpg = _to_float(_pick(row, ["blk"]), default=None)
+
+    # ---- Compute TRUE FG% ----
+    twoPA = _to_float(_pick(row, ["twoPA"]), default=0.0)
+    TPA = _to_float(_pick(row, ["TPA"]), default=0.0)
+
+    twoP_pct = _to_pct(_pick(row, ["twoP_per"]))   # already 0-100 in your data
+    threeP_pct = _to_pct(_pick(row, ["TP_per"]))
+    ft_pct = _to_pct(_pick(row, ["FT_per"]))
+
+    fg_pct = None
+    if (twoPA + TPA) > 0:
+        fg_pct = (twoP_pct * twoPA + threeP_pct * TPA) / (twoPA + TPA)
+
     stats = {
-        "ppg": _to_float(_pick(row, ["PPG", "ppg", "PTS"])),
-        "rpg": _to_float(_pick(row, ["RPG", "rpg", "TRB", "REB"])),
-        "apg": _to_float(_pick(row, ["APG", "apg", "AST"])),
-        "spg": _to_float(_pick(row, ["SPG", "spg", "STL"])),
-        "bpg": _to_float(_pick(row, ["BPG", "bpg", "BLK"])),
-        "fgPct": _to_pct(_pick(row, ["FG%", "FG_PCT", "fgPct", "fg_pct"])),
-        "threePct": _to_pct(_pick(row, ["3PT%", "3P%", "3P_PCT", "threePct", "tp_pct"])),
-        "ftPct": _to_pct(_pick(row, ["FT%", "FT_PCT", "ftPct", "ft_pct"])),
-        "topg": _to_float(_pick(row, ["TO/G", "TOV/G", "topg", "TOV"])),
-        "mpg": _to_float(_pick(row, ["MPG", "mpg", "Min_per"])),
+        "ppg": ppg,
+        "rpg": rpg,
+        "apg": apg,
+        "spg": spg,
+        "bpg": bpg,
+        "fgPct": fg_pct,
+        "threePct": threeP_pct,
+        "ftPct": ft_pct,
+        "topg": None,  # you only have TO_per (rate), not per-game turnovers
+        "mpg": mpg,
     }
 
     # --- NBA comps (reuse your existing comps logic/pool) ---
