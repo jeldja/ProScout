@@ -7,6 +7,84 @@ import pandas as pd
 from model.archetypes import train_nba_archetypes, assign_ncaa_to_archetype, top_nba_examples, ARCHETYPE_NAMES
 
 
+def _pick(row, candidates, default=None):
+    for c in candidates:
+        if c in row.index and pd.notna(row[c]):
+            return row[c]
+    return default
+
+def _to_float(x, default=0.0):
+    try:
+        if x is None or (isinstance(x, float) and np.isnan(x)):
+            return default
+        return float(x)
+    except Exception:
+        return default
+
+def _to_pct(x):
+    """Accepts 0-1 or 0-100 and returns 0-100."""
+    val = _to_float(x, default=0.0)
+    if val <= 1.0:
+        return val * 100.0
+    return val
+
+def _slug_id(name: str) -> str:
+    return name.strip().lower().replace(" ", "-")
+
+def _clamp(x, lo=0.0, hi=100.0):
+    return max(lo, min(hi, x))
+
+def compute_draftability_score(stats: dict, archetype_conf: float) -> float:
+    """
+    Placeholder scoring (0-100). Adjust later when your real model is ready. THIS IS JUST DUMMY
+    """
+    ppg = stats.get("ppg", 0.0)
+    fg = stats.get("fgPct", 0.0)
+    tp = stats.get("threePct", 0.0)
+    ft = stats.get("ftPct", 0.0)
+    bpg = stats.get("bpg", 0.0)
+    tov = stats.get("topg", 0.0)
+    mpg = stats.get("mpg", 0.0)
+
+    score = 40.0
+    score += 1.2 * ppg
+    score += 0.15 * fg
+    score += 0.10 * tp
+    score += 0.10 * ft
+    score += 3.0 * bpg
+    score += 0.25 * mpg
+    score -= 2.5 * tov
+    score += 20.0 * float(archetype_conf)  # archetype certainty boost
+
+    return _clamp(score, 0.0, 100.0)
+
+def career_outcomes_from_score(score: float):
+    """
+    Produces probabilities that sum to 1.
+    Outcomes are derived from draftabilityScore.
+    """
+    # Simple piecewise baselines
+    if score >= 85:
+        probs = {"Star": 0.35, "Starter": 0.45, "Rotation": 0.18, "Long Shot": 0.02}
+    elif score >= 70:
+        probs = {"Star": 0.15, "Starter": 0.45, "Rotation": 0.35, "Long Shot": 0.05}
+    elif score >= 55:
+        probs = {"Star": 0.05, "Starter": 0.25, "Rotation": 0.50, "Long Shot": 0.20}
+    else:
+        probs = {"Star": 0.02, "Starter": 0.10, "Rotation": 0.35, "Long Shot": 0.53}
+
+    descriptions = {
+        "Star": "High-impact NBA player; multiple seasons as a top option or elite defender.",
+        "Starter": "Reliable NBA starter-level contributor with a stable role.",
+        "Rotation": "Bench/rotation contributor; role depends on fit and development.",
+        "Long Shot": "Needs major development or elite fit to stick long-term in the league.",
+    }
+
+    return [
+        {"outcome": k, "probability": float(v), "description": descriptions[k]}
+        for k, v in probs.items()
+    ]
+
 app = Flask(__name__)
 
 # Load + engineer data once
@@ -148,6 +226,87 @@ def get_archetype(player_name):
         "confidence": round(float(confidence), 4),
         "stats": stats_payload
     })
+
+@app.get("/player/<player_name>")
+def get_player(player_name):
+    name_key = player_name.strip().lower()
+
+    # NCAA lookup uses df_current["player_name"] (already normalized in your app)
+    match = df_current[df_current["player_name"] == name_key]
+    if match.empty:
+        return jsonify({"error": f"Player not found: {player_name}"}), 404
+
+    row = match.iloc[0]
+
+    # --- Archetype ---
+    cluster_id, archetype_name, archetype_conf, _ = assign_ncaa_to_archetype(row, kmeans_archetypes)
+
+    # --- Stats for your UI (match TS interface camelCase) ---
+    stats = {
+        "ppg": _to_float(_pick(row, ["PPG", "ppg", "PTS"])),
+        "rpg": _to_float(_pick(row, ["RPG", "rpg", "TRB", "REB"])),
+        "apg": _to_float(_pick(row, ["APG", "apg", "AST"])),
+        "spg": _to_float(_pick(row, ["SPG", "spg", "STL"])),
+        "bpg": _to_float(_pick(row, ["BPG", "bpg", "BLK"])),
+        "fgPct": _to_pct(_pick(row, ["FG%", "FG_PCT", "fgPct", "fg_pct"])),
+        "threePct": _to_pct(_pick(row, ["3PT%", "3P%", "3P_PCT", "threePct", "tp_pct"])),
+        "ftPct": _to_pct(_pick(row, ["FT%", "FT_PCT", "ftPct", "ft_pct"])),
+        "topg": _to_float(_pick(row, ["TO/G", "TOV/G", "topg", "TOV"])),
+        "mpg": _to_float(_pick(row, ["MPG", "mpg", "Min_per"])),
+    }
+
+    # --- NBA comps (reuse your existing comps logic/pool) ---
+    # Keep it simple: just use the already-built df_nba_clean + knn + scaler
+    comps_df = find_similar_players(row, df_nba_clean, knn, scaler, k=5)
+
+    comps = []
+    for _, r in comps_df.iterrows():
+        comps.append({
+            "name": str(r.get("Player", "")),
+            "team": str(r.get("Team", "")),
+            "position": str(r.get("Pos", "")),
+            "matchScore": float(r.get("similarity_score", 0.0)),
+            "headshotUrl": "",  # you can fill later if you add a mapping table
+            "similarities": [],
+            "differences": [],
+            "stats": {
+                "ppg": _to_float(r.get("PTS", 0.0)),
+                "rpg": _to_float(r.get("TRB", 0.0)),
+                "apg": _to_float(r.get("AST", 0.0)),
+            }
+        })
+
+    primary_comp = comps[0]["name"] if len(comps) > 0 else ""
+
+    # --- Draftability + outcomes, this is dummy ---
+    draft_score = compute_draftability_score(stats, archetype_conf)
+    outcomes = career_outcomes_from_score(draft_score)
+
+    # --- Build Player object (match TS interface) ---
+    name = str(row.get("player_name", player_name))
+
+    player_payload = {
+        "id": _slug_id(name),
+        "name": name,
+        "headshotUrl": "",  # optional for now
+        "school": str(_pick(row, ["School", "school", "Team", "team"], default="")),
+        "year": str(_pick(row, ["Year", "year", "Class", "class"], default="")),
+        "position": str(_pick(row, ["Pos", "pos", "Position", "position"], default="")),
+        "height": str(_pick(row, ["Height", "height"], default="")),
+        "weight": str(_pick(row, ["Weight", "weight"], default="")),
+        "archetype": archetype_name,
+        "archetypeConfidence": round(float(archetype_conf), 4),
+        "nbaComp": primary_comp,
+        "nbaComparisons": comps,
+        "stats": stats,
+        "careerOutcomes": outcomes,
+        "seasonLog": [],       # fill later if you add season-by-season NCAA data
+        "strengths": [],       # fill later (or generate heuristically)
+        "weaknesses": [],      # fill later
+        "draftabilityScore": round(float(draft_score), 1),
+    }
+
+    return jsonify(player_payload)
 
 if __name__ == "__main__":
     app.run(debug=True)
